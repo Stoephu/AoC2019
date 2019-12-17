@@ -156,6 +156,22 @@ class preter():
         self.output = []
         return result
     
+    def manual_input(self):
+        while self.pointer < len(self.memory.keys):
+            if self.memory[self.pointer] == 99:
+                print("Halted program")
+                self.output.append(-1)
+                break
+            
+            else:
+                step_size = self.execute(self.memory[self.pointer], self.pointer)
+                self.pointer += step_size
+                if step_size == 2 and self.memory[self.pointer - step_size] == 4:
+                    if self.verbose: print("pausing amp",self.memory[self.pointer - step_size],self.pointer,step_size)
+                    result = self.output.copy()
+                    self.output = []
+                    return result
+    
     def add_phase(self,phase):
         self.program_input.append(phase)
         
