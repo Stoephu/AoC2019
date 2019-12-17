@@ -216,7 +216,7 @@ if True:
     robot_input.extend(A)
     robot_input.extend(B)
     robot_input.extend(C)
-    robot_input.extend([ord("n"),10])
+    robot_input.extend([ord("y"),10])
     output = preter.start_program(*robot_input)
     output_string = ""
     for i in output:
@@ -225,3 +225,35 @@ if True:
     print(output[-1])
 
 print(time.default_timer()-start)
+
+import matplotlib.animation as animation
+
+
+
+
+# ims is a list of lists, each row is a list of artists to draw in the
+# current frame; here we are just animating one artist, the image, in
+# each frame
+image_raw = str(output).replace(", 10, 10,","]:[")
+image_strings = image_raw.split(":")
+image_values = []
+for string in image_strings:
+    edit = string.replace("[","").replace("]","").split(",")
+    matrix = np.zeros((width, len(program_output)//width))
+    for i, tile in enumerate(edit):
+    #print((i+1)%10, tile)
+       matrix[(i) % width,(i)//width] = tile
+    image_values.append(matrix)
+    
+fig = plt.figure()
+
+ims = []
+for image in image_values:
+    im = plt.imshow(image, animated=True)
+    ims.append([im])
+
+ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True,
+                                repeat_delay=1000)
+
+ani.save('filename.gif', writer='imagemagick')
+
