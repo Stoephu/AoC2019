@@ -48,7 +48,7 @@ zero = np.array((0,0))
 map_size = np.array(scaffold_map.shape)
 while end == False:
     fx,fy = current_pos+direction
-    print(current_pos)
+    #print(current_pos)
     rx,ry = current_pos+np.dot(right,direction)
     lx,ly = current_pos + np.dot(left,direction)
     if all((fx,fy) >= zero) and all((fx,fy) < map_size) and scaffold_map[fx,fy] == 35:
@@ -65,19 +65,19 @@ while end == False:
 
 
 
-print(path)
+#print(path)
 
 
 groups = groupby(path)
 result = [(label, sum(1 for _ in group)) for label, group in groups]
-print(result)
+#print(result)
 command = ""
 for tup in result:
     if tup[0] == "F":
         command += str(tup[1])
     else:
         command += tup[0]
-print(command)
+#print(command)
 
 #zipping
 
@@ -87,16 +87,16 @@ c = ""
 
 def find_repeat(string):
     aas = {}
-    print("string",string)
+    #print("string",string)
     for i in range(1,len(string)):
         if i > 11:
             break
         tempa = string[:i]
         aas[string.count(tempa)] = tempa
     keys = list(aas.keys())
-    print(keys)
+    #print(keys)
     keys.sort()
-    print(aas.values())
+    #print(aas.values())
     #keys.reverse()
     return aas.values()
 
@@ -115,13 +115,13 @@ for a,b,c in product(aas,bbs,ccs):
     if not len(command.replace(a,"").replace(b,"").replace(c,"")):
         results.append((a,b,c))
         
-print("Results",results)
+#print("Results",results)
 a,b,c = results[0]
-print("a",a,"b",b,"c",c,"command",command.replace(a,"").replace(b,"").replace(c,""))
+#print("a",a,"b",b,"c",c,"command",command.replace(a,"").replace(b,"").replace(c,""))
 temp = command
 main = ""
 while len(temp)>0:
-    print(temp)
+    #print(temp)
     if temp[:len(a)] == a:
         temp = temp.replace(a,"",1)
         main += "A"
@@ -160,7 +160,7 @@ for i,ch in enumerate(a):
     else:
         A += ch + ","
 A = A[:-1]
-print(A)
+#print(A)
 A = to_ascii(A)
 
 B = ""
@@ -178,7 +178,7 @@ for i,ch in enumerate(b):
     else:
         B += ch + ","
 B = B[:-1]
-print(B)
+#print(B)
 B = to_ascii(B)
 
 C = ""
@@ -196,7 +196,7 @@ for i,ch in enumerate(c):
     else:
         C += ch + ","
 C = C[:-1]
-print(C)
+#print(C)
 C = to_ascii(C)
 
 
