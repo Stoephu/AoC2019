@@ -30,57 +30,63 @@ for string in strings:
         if (not char in non_keys) and char.islower():
             keys.add(ord(char))
 rand = deque()
-checked = set()
 time_needed = {}
 index = np.where(dungeon==player)
 pcoord = (index[0][0],index[1][0],())
 rand.append(pcoord)
 time_needed[pcoord] = 0
 shape = dungeon.shape
-checked.add(pcoord)
 #coord  = (y,x,keys_found)
+shortesttime = shape[0]*shape[1]
 
 def get_unchecked_neighbours(coord):
+    global shortesttime
     y,x,oldkeys = coord
-    tile = dungeon[y,x]
     neighbours = []
-    if chr(tile).islower() and not tile in oldkeys:
-        new = list(oldkeys)
-        new.append(tile)
-        temp = (y,x,tuple(new))
-        neighbours.append(temp)
-        time_needed[temp] = time_needed[coord]
-    x1 = (y,x+1,oldkeys)
-    x2 = (y,x-1,oldkeys)
-    x3 = (y+1,x,oldkeys)
-    x4 = (y-1,x,oldkeys)
+    x1 = (y,x+1)
+    x2 = (y,x-1)
+    x3 = (y+1,x)
+    x4 = (y-1,x)
     xis = [x1,x2,x3,x4]
     for xi in xis:
-        if not xi in checked:
-            if xi[0] >= 0 and xi[0]< shape[0] and xi[1]>=0 and xi[1]< shape[1]:
-                if (chr(dungeon[xi[0],xi[1]]).isupper() and not dungeon[xi[0],xi[1]]+diffUpper in oldkeys) or dungeon[xi[0],xi[1]] == ord("#"):
+        ntile = dungeon[xi[0],xi[1]]
+        if not ntile == ord("#"):
+#        if xi[0] >= 0 and xi[0]< shape[0] and xi[1]>=0 and xi[1]< shape[1]:
+            new = oldkeys
+            if (chr(ntile).isupper() and not ntile+diffUpper in new):
+               pass
+            else:
+                if chr(ntile).islower():
+                    if not ntile in oldkeys:
+                        new = list(oldkeys)
+                        new.append(ntile)
+                        new = tuple(sorted(new))
+                ncoord = (xi[0],xi[1],new)    
+                if ncoord in time_needed and time_needed[coord] + 1 > time_needed[ncoord]:
                     pass
                 else:
-                    neighbours.append(xi)
-                    time_needed[xi] = time_needed[coord] + 1
-    for neigh in neighbours:
-        checked.add(neigh)
+                    neighbours.append(ncoord)
+                    time_needed[ncoord] = time_needed[coord] + 1
+                    if len(new) == len(keys) and shortesttime > time_needed[ncoord]:
+                        shortesttime = time_needed[ncoord]
     return neighbours
 
 current = pcoord
 i = 0
-while len(keys) > len(current[2]) and rand:
+while rand:
     i += 1
     current = rand.popleft()
     if not(i%50000):
         print(len(current[2]))
+        print(current)
     neigh = get_unchecked_neighbours(current)
     rand.extend(neigh)
-print(time_needed[current])
+print(shortesttime)
 """
 plt.imshow(dungeon)
 plt.show()
 print(time.default_timer()-start)
-"""
+
 import matplotlib.animation as animation
 
+"""

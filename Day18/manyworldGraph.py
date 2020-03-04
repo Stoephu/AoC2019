@@ -17,10 +17,10 @@ from itertools import product, permutations
 from itertools import groupby
 import matplotlib.pyplot as plt 
 from collections import deque
-
+debug = False
 start = time.default_timer()
 #part1
-inputs = [string for string in open("test.txt")]
+inputs = [string for string in open("data.txt")]
 strings = [string.strip() for string in inputs]
 dungeon = np.empty((len(strings),len(strings[0])),dtype="int")
 for y in range(dungeon.shape[0]):
@@ -39,40 +39,49 @@ for string in strings:
     for char in string:
         if (not char in non_keys) and char.islower():
             keys.add(ord(char))
-            if (not char in non_keys) and char.isupper():
-                doors.add(ord(char))
+        if (not char in non_keys) and char.isupper():
+            doors.add(ord(char))
 
-
+#node for graph class
 class tile:
     
     def __init__(self,tileValue, coord):
         self.value = tileValue
         self.neighbours = set()
         self.coord = coord
-        self.shortest_to_important = {}
+        self.important = {}
         
     def addNeighbour(self,neigh):
         self.neighbours.add(neigh)
     
     def add_important(self,tile,distance):
-        self.shortest_to_important[tile] = distance
+        self.important[tile] = distance
         
+#generate big graph        
+#convert map to graph
 rand = deque()
 time_needed = {}
 index = np.where(dungeon==player)
-pcoord = (index[0][0],index[1][0])
-playertile = tile(ord("@"),pcoord)
-rand.append(playertile)
-time_needed[playertile] = 0
+orpcoord = (index[0][0],index[1][0])
+dungeon[orpcoord[0]-1:orpcoord[0]+2,orpcoord[1]-1:orpcoord[1]+2] = np.array([[64,35,64],[35,35,35],[64,35,64]])
+indices = np.where(dungeon == player)
+pcoords = []
+for i in range(len(indices[0])):
+    pcoords.append((indices[0][i],indices[1][i]))
+    
+playertiles = [tile(ord("@"),pcoord) for pcoord in pcoords]
+rand.extend(playertiles)
+for playertile in playertiles:
+    time_needed[playertile] = 0
 checked = set()
-checked.add(pcoord)
+checked.update(pcoords)
 alltiles = {}
 alldoors = set()
 allkeys = set()
 
 def get_unchecked_neighbours(current):
+    #string = chr(current.value) + " => "
     y,x = current.coord
-    tilevalue = dungeon[y,x]
     neighbours = []
     x1 = (y,x+1)
     x2 = (y,x-1)
@@ -82,16 +91,18 @@ def get_unchecked_neighbours(current):
     for xi in xis:
         if not xi in checked:
             if xi[0] >= 0 and xi[0]< shape[0] and xi[1]>=0 and xi[1]< shape[1]:
-                if  dungeon[xi[0],xi[1]] == ord("#"):
+                tilevalue = dungeon[xi[0],xi[1]]
+                if  tilevalue == ord("#"):
                     pass
                 else:
                     ntile = tile(tilevalue,xi)
-                    if chr(tilevalue).isupper:
+                    if chr(tilevalue).isupper():
                         alldoors.add(ntile)
-                    elif chr(tilevalue).isupper:
+                    elif chr(tilevalue).islower():
                         allkeys.add(ntile)
                     ntile.addNeighbour(current)
                     current.addNeighbour(ntile)
+                    #string += chr(ntile.value) +","
                     neighbours.append(ntile)
                     alltiles[xi] = ntile
                     time_needed[ntile] = time_needed[current] + 1
@@ -99,18 +110,11 @@ def get_unchecked_neighbours(current):
             if xi in alltiles:
                 current.addNeighbour(alltiles[xi])
     for neigh in neighbours:
-        checked.add(ntile.coord)
+        checked.add(neigh.coord)
+    #print(string)
     return neighbours
-#convert map to graph
-def get_unchecked_neighbours_graph(node):
-    neigh = node.neighbours
-    a = []
-    for ne in neigh:
-        if not ne in checked:
-            a.append(ne)
-    for ne in a:
-        checked.add(ne)
-    return a
+
+
 
 
 i = 0
@@ -123,29 +127,137 @@ while rand:
         #print(neigh)
     i+= 1
 
-#reduce nodes only important neighbours
+
+def show_all_important(node):
+    string = chr(node.value)+ " => "
+    for ne in node.important:
+        string += chr(ne.value) + str(node.important[ne]) + ","
+    print(string)
+    
+    
+#reduce graph to only important neighbours
 print("reduce!")
+
+def get_unchecked_neighbours_graph(node):
+    neigh = node.neighbours
+    a = []
+    for ne in neigh:
+        if not ne in checked:
+            a.append(ne)
+    for ne in a:
+        checked.add(ne)
+    return a
+
 all_important = alldoors.union(allkeys)
-all_important.add(playertile)
+all_important.update(playertiles)
 
 for node in all_important:
     rand = deque()
     checked = set()
     time_needed = {}
-    rand.append(node)
+    rand.append((node,0))
     checked.add(node)
-    i = 0
     while rand:
-        i+= 1
-        current = rand.popleft()
+        current, i = rand.popleft()
         neigh = get_unchecked_neighbours_graph(current)
         for ne in neigh:
             if ne in all_important:
-                neigh.remove(ne)
-                current.add_important(ne,i)
-                ne.add_important(current,i)
-        rand.extend(neigh)
+                print(chr(node.value),"=>",chr(ne.value),i+1)
+                node.add_important(ne,i+1)
+                ne.add_important(node,i+1)
+            else:
+                rand.append((ne,i+1))
         if not i%20000:
             print(len(rand))
             #print(neigh)
+            
+#breitensuche
+
+def get_graph_neighbours(coord):
+    nodes,tilename, old = coord
+    a = []
+    for i in range(len(nodes)):
+        node = nodes[i]
+        for ne in node.important:
+            if chr(ne.value).islower() and not chr(ne.value) in old:
+                        l = list(old)
+                        l.append(chr(ne.value))
+                        new = tuple(sorted(l))
+            else:
+                new = old
+            newnodes = list(nodes)
+            newnodes[i] = ne
+            newnodes = tuple(newnodes)
+            necoord = (newnodes,1,new)
+            if chr(ne.value).isupper() and not chr(ne.value + diffUpper) in new:
+                pass
+            else:
+                if faster_time(necoord, time_needed[coord] + node.important[ne]):
+                    a.append(necoord)
+    return a
+
+lowesttime = 10000
+def faster_time(coord,time):
+    global lowesttime
+    faster = False
+    if coord in time_needed:
+        if time_needed[coord]>time:
+            time_needed[coord] = time
+            faster = True
+    else:
+        time_needed[coord] = time
+        faster = True
+    if len(coord[2]) == len(allkeys) and time < lowesttime:
+        print("lower!")
+        lowesttime = time
+    return faster
+
+def get_tree(node, tree = set(), indent = 0):
+    tree.add(node)
+    string = chr(node.value) + "\n"
+    a = set()
+    for ne in node.important:
+        if not ne in tree:
+            a.add(ne)
+    tree.update(node.important)
+    for ne in a:
+            string += " "*indent + "¦" + "\n"
+            string += " "*indent + "-" + str(node.important[ne]) +" " + get_tree(ne,tree, indent + 1)
+    return string
+for playertile in playertiles:
+    print(get_tree(playertile))            
+
+rand = deque()
+time_needed = {}
+old  = ()
+coord = (tuple(playertiles),chr(playertile.value),old)
+rand.append(coord)
+time_needed[coord] = 0
+current = coord
+i = 0
+last12 =[]
+while rand or len(allkeys)>len(current[2]):
+    current = rand.popleft()
+    neigh = get_graph_neighbours(current)
+    rand.extend(neigh)
+    if debug:
+        print("current =", chr(current[0][0].value),chr(current[0][1].value),chr(current[0][2].value),chr(current[0][3].value))
+        print("keys",current[2])
+        for ne in current[0][0].important:
+            print(chr(ne.value))
+        print("rand:")
+        #for r in rand:
+        #    print(r[1],r[2])
+        print("#rand",len(rand))
+        print("diff keys",len(allkeys), len(current[2]))
+    if not i%20000:
+        print(len(rand))
+        print(current[2])
+        last12.append(len(current[2]))
+        if len(last12)>12:
+            last12.pop(0)
+        print("last12",sum(last12)/12)
+        print(len(allkeys), len(current[2]))
+    i += 1
+print("steps needed", lowesttime)
 print(time.default_timer()-start)
