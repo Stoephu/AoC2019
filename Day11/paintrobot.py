@@ -18,17 +18,15 @@ import intcode
 probot = intcode.computer()
 probot.load_program_txt("data.txt")
 coords_painted = {}
-verbose = True
-last_output = probot.start_program([0],verbose = verbose)
+verbose = False
+last_output = probot.start_program([1],verbose = verbose)
 robot_pos = (0,0)
 facing = (0,1)
 i = 0 
 while last_output[-1] != -1:
     i+=1
     coords_painted[robot_pos] = last_output[0]
-    print(facing, last_output)
     facing = (facing[1]*(-1 + 2*last_output[1]),facing[0]*(1 - 2*last_output[1]))
-    print(facing)
     robot_pos = (robot_pos[0]+facing[0],robot_pos[1]+facing[1])
     if robot_pos in coords_painted:
         last_output = probot.continue_program([coords_painted[robot_pos]],verbose = verbose)

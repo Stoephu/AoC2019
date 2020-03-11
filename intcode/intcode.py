@@ -130,9 +130,10 @@ class computer():
         return self.continue_program(user_input,verbose = verbose)
     
     
-    def continue_program(self, *input_1, verbose = False):
+    def continue_program(self, input_1, verbose = False):
         self.verbose = verbose
         self.program_input.extend(input_1)
+        if self.verbose: print(self.program_input)
         while self.pointer < len(self.memory.keys()):
             if self.memory[self.pointer] == 99:
                 print("Halted program")
@@ -149,11 +150,13 @@ class computer():
                     self.output =  []
                     return result
                 self.pointer += step_size
+                """
                 if step_size == 2 and self.memory[self.pointer - step_size] == 4:
                     if self.verbose: print("pausing computer",self.memory[self.pointer - step_size],self.pointer,step_size)
                     result = self.output.copy()
                     self.output = []
                     return result
+                """
                 #print(memory)
     
         result = self.output.copy()
