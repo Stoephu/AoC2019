@@ -15,7 +15,7 @@ sys.path.append("../intcode")
 
 start = time.default_timer()
 #part1
-strings = [string for string in open("data.txt")]
+strings = [string for string in open("large.txt")]
 x_moons = np.zeros((len(strings),3))
 v_moons = np.zeros_like(x_moons)
 v = v_moons.copy()
@@ -47,18 +47,23 @@ for i in range(1000):
 end_energy = lambda x,v:np.sum(np.abs(x),axis = 1)*np.sum(np.abs(v), axis = 1)
 
 #part 2
-
-init_x = x_moons.copy()[:,0]
-init_v = v.copy()[:,0]
-x = x_moons.copy()[:,0]
-v = v_moons.copy()[:,0]
-i = 0
-while  not np.all(x[0] == init_x[0]) or not np.all(v[0] == init_v[0]) or i == 0:
-    i+=1
-    v = grav(x,v)
-
-    x += v
-    if not i%100000:
-        print(i)
-
+periodicity = {}
+for j in range(3):
+    
+    init_x = x_moons.copy()[:,j]
+    init_v = v_moons.copy()[:,j]
+    
+    steps = 0
+    x = init_x.copy()
+    v = init_v.copy()
+    while len(periodicity)<4*(j+1):
+        steps+=1
+        v = grav(x,v)
+        x += v
+        if not steps % 100000:
+            print(steps, periodicity)
+        for i in range(4):
+            if not (j,i) in periodicity:
+                if np.all(x[i] == init_x[i]) and np.all(v[i] == 0):
+                    periodicity[(j,i)] = steps
 print(time.default_timer()-start)
