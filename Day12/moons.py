@@ -15,7 +15,7 @@ sys.path.append("../intcode")
 
 start = time.default_timer()
 #part1
-strings = [string for string in open("large.txt")]
+strings = [string for string in open("data.txt")]
 x_moons = np.zeros((len(strings),3))
 v_moons = np.zeros_like(x_moons)
 v = v_moons.copy()
@@ -64,6 +64,37 @@ for j in range(3):
             print(steps, periodicity)
         for i in range(4):
             if not (j,i) in periodicity:
-                if np.all(x[i] == init_x[i]) and np.all(v[i] == 0):
-                    periodicity[(j,i)] = steps
+                if np.all(x == init_x) and np.all(v == 0):
+                    periodicity[(j,i)] = int(steps)
+print(periodicity)
+print(np.lcm.reduce(list(periodicity.values())))
+
+def find_lcm(num1, num2): 
+    if(num1>num2): 
+        num = num1 
+        den = num2 
+    else: 
+        num = num2 
+        den = num1 
+    rem = num % den 
+    while(rem != 0): 
+        num = den 
+        den = rem 
+        rem = num % den 
+    gcd = den 
+    lcm = int(int(num1 * num2)/int(gcd)) 
+    return lcm 
+      
+l = [2, 7, 3, 9, 4] 
+  
+num1 = l[0] 
+num2 = l[1] 
+periodicity = list(periodicity.values())
+lcm = find_lcm(periodicity[0], periodicity[1]) 
+  
+for num in periodicity[2:]: 
+    lcm = find_lcm(lcm, num) 
+      
+print(lcm) 
+
 print(time.default_timer()-start)
