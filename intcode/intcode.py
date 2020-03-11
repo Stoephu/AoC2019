@@ -145,7 +145,9 @@ class computer():
                     self.wait_for_input = False
                     if self.verbose: print("pausing computer, waiting for input",self.memory[self.pointer - step_size],self.pointer)
                     self.output.append(-3)
-                    return self.output
+                    result = self.output.copy()
+                    self.output =  []
+                    return result
                 self.pointer += step_size
                 if step_size == 2 and self.memory[self.pointer - step_size] == 4:
                     if self.verbose: print("pausing computer",self.memory[self.pointer - step_size],self.pointer,step_size)
