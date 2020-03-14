@@ -138,17 +138,15 @@ class computer():
             if self.memory[self.pointer] == 99:
                 print("Halted program")
                 self.output.append(-1)
-                break
+                return self
+                
             
             else:
                 step_size = self.execute(self.memory[self.pointer], self.pointer)
                 if self.wait_for_input:
                     self.wait_for_input = False
                     if self.verbose: print("pausing computer, waiting for input",self.memory[self.pointer - step_size],self.pointer)
-                    self.output.append(-3)
-                    result = self.output.copy()
-                    self.output =  []
-                    return result
+                    return self
                 self.pointer += step_size
                 """
                 if step_size == 2 and self.memory[self.pointer - step_size] == 4:
@@ -159,6 +157,12 @@ class computer():
                 """
                 #print(memory)
     
+        result = self.output.copy()
+        self.output = []
+        return result
+    
+    
+    def get_output(self):
         result = self.output.copy()
         self.output = []
         return result
