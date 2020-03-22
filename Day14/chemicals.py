@@ -16,15 +16,17 @@ sys.path.append("../intcode")
 
 start = time.default_timer()
 
-strings = [string for string in open("data.txt")]
+strings = [string for string in open("medium.txt")]
 more_strings = [string.replace("=>",",").split(",") for string in strings]
 parsed = []
+
 for tup in more_strings:
     tmp = [string.split() for string in tup]
     parsed.append(tmp)
 
 reactions = {}
 elements = {}
+
 for reaction in parsed:
     for tup in reaction:
         elements[tup[-1]] = 0
@@ -32,24 +34,25 @@ for reaction in parsed:
 elements["FUEL"] = 1
 
 def create_reaction(reaction):
-    def fun():
+    def fun(times):
         product = reaction[-1]
-        elements[product[-1]] -= int(product[0])
+        elements[product[-1]] -= times*int(product[0])
         for educt in reaction[:-1]:
-            elements[educt[-1]] += int(educt[0])
+            elements[educt[-1]] += times*int(educt[0])
 
     return fun
 
 for reaction in parsed:
     product = reaction[-1]
     fun = create_reaction(reaction)
-    reactions[product[-1]] = (product[0],fun)
+    reactions[product[-1]] = (int(product[0]),fun)
 
 def reduce(element):
     number = elements[element]
     reduction, fun = reactions[element]
     while number > 0:
-        fun()
+        times = int(np.ceil(number/reduction))
+        fun(times)
         number = elements[element]
 
 all_negative = False
@@ -61,5 +64,22 @@ while not all_negative:
             all_negative = False
             break
 
+cost_one_fuel = elements["ORE"]
+print(cost_one_fuel)
 
+print(elements)
+for reaction in parsed:
+    for tup in reaction:
+        elements[tup[-1]] = 0
+
+trillion = 1000000000000
+
+fuels = 0
+while trillion - elements["ORE"] > cost_one_fuel:
+    elements["FUEL"]  = int((trillion - elements["ORE"]) /cost_one_fuel)
+    fuels += elements["FUEL"]    
+    for element in elements.keys():
+        if elements[element] > 0 and element != "ORE":
+            reduce(element)
+print(fuels)
 print(time.default_timer()-start)
