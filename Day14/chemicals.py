@@ -16,7 +16,7 @@ sys.path.append("../intcode")
 
 start = time.default_timer()
 
-strings = [string for string in open("medium.txt")]
+strings = [string for string in open("data.txt")]
 more_strings = [string.replace("=>",",").split(",") for string in strings]
 parsed = []
 
@@ -65,7 +65,7 @@ while not all_negative:
             break
 
 cost_one_fuel = elements["ORE"]
-print(cost_one_fuel)
+print("1fuel",cost_one_fuel)
 
 print(elements)
 for reaction in parsed:
@@ -77,9 +77,15 @@ trillion = 1000000000000
 fuels = 0
 while trillion - elements["ORE"] > cost_one_fuel:
     elements["FUEL"]  = int((trillion - elements["ORE"]) /cost_one_fuel)
+    print(elements["FUEL"])
     fuels += elements["FUEL"]    
-    for element in elements.keys():
-        if elements[element] > 0 and element != "ORE":
-            reduce(element)
-print(fuels)
+    all_negative = False
+    while not all_negative:
+        all_negative = True
+        for element in elements.keys():
+            if elements[element] > 0 and element != "ORE":
+                reduce(element)
+                all_negative = False
+                break
+print("totalfuel",fuels)
 print(time.default_timer()-start)

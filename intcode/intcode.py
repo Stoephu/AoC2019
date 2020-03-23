@@ -121,7 +121,7 @@ class computer():
         return step_size
     
     
-    def start_program(self,  user_input, verbose = False):
+    def start_program(self,  user_input = [], verbose = False):
         self.verbose = verbose
         self.output = []
         self.pointer = 0
@@ -130,7 +130,7 @@ class computer():
         return self.continue_program(user_input,verbose = verbose)
     
     
-    def continue_program(self, input_1, verbose = False):
+    def continue_program(self, input_1 = [], verbose = False):
         self.verbose = verbose
         self.program_input.extend(input_1)
         if self.verbose: print(self.program_input)
