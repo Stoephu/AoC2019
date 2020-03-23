@@ -17,7 +17,7 @@ sys.path.append("../algorithms")
 import intcode
 import bfs
 
-
+debug = False
 start = time.default_timer()
 # 0 is wall, 1 is path, 2 is goal
 ccoord = (0,0)
@@ -26,6 +26,7 @@ robot = intcode.computer()
 robot.load_program_txt()
 path = deque()
 direction = {}
+robot.start_program([])
 
 def set_direction(coord):
     global direction
@@ -37,31 +38,30 @@ def set_direction(coord):
 set_direction(ccoord)
 hidden = set(direction.values())
 nmove = 0
-while hidden and len(coords_visited)<100:
+while hidden and len(coords_visited)<1000:
     for command in direction:
-        if not direction[command] in coords_visited:
-            nmove = command
-            break
-        else:
-            nmove = 0
-    
+            if not direction[command] in coords_visited:
+                nmove = command
+                break
+            else:
+                nmove = 0
     if not nmove:
         lastcommand = path.pop()
         nmove = (lastcommand+2)%4 if (lastcommand+2)%4 else 4
     not_wall = robot.continue_program([nmove]).get_output()[0]
-    #print(nmove,not_wall)
+    if debug:print(nmove,not_wall)
     #remove bug backtracking not in hidden
     coords_visited[direction[nmove]] = not_wall
     hidden.remove(direction[nmove])
     if not_wall:
+        if debug: print("direction before:",direction)
         set_direction(direction[nmove])
+        if debug: print("direction after:",direction)
         path.append(nmove)
         for command in direction:
             if not direction[command] in coords_visited:
                 hidden.add(direction[command])
-    #if len(coords_visited)%10000:
-     #   print("visited",len(coords_visited))
-    pass
+    x = 0
     
 m = 0
 for tup in coords_visited.keys():
