@@ -8,17 +8,47 @@ from collections import deque
 
 
 def get_shortest_path(start,end):
-    checked = {}
+    time_needed = {}
     queue = deque()    
-    queue.append((start,[]))
-    checked[start] = (0,[])
+    queue.append(start)
+    time_needed[start] = 0
     while queue:
-        node, path = queue.popleft()
-        time = checked[node][0]
-        for distance, neighbour in node.neighbour:
-            if not (neighbour in checked and checked[neighbour][0] < time + distance):                
-                npath = path + [neighbour]
-                checked[neighbour] = (time + distance, npath)
-                queue.append((neighbour,npath))
-    length, path = checked[end]
-    return length, path
+        node = queue.popleft()
+        time = time_needed[node]
+        for neighbour, distance in node.neighbours:
+            if neighbour in time_needed:
+                if time_needed[neighbour] > time + distance:                
+                    time_needed[neighbour] = time + distance
+                    queue.append(neighbour)
+            else:
+                time_needed[neighbour] = time + distance
+                queue.append(neighbour)
+        if not len(queue)%100: print(len(queue))
+    length = time_needed[end]
+    return length
+
+def get_time_to_all(start):
+    time_needed = {}
+    queue = deque()    
+    queue.append(start)
+    time_needed[start] = 0
+    while queue:
+        node = queue.popleft()
+        time = time_needed[node]
+        for neighbour, distance in node.neighbours:
+            if neighbour in time_needed:
+                if time_needed[neighbour] > time + distance:                
+                    time_needed[neighbour] = time + distance
+                    queue.append(neighbour)
+            else:
+                time_needed[neighbour] = time + distance
+                queue.append(neighbour)
+        if not len(queue)%100: print(len(queue))
+    return time_needed
+
+class node:
+    def __init__ (self,coord):
+        self.coord = coord
+        self.neighbours = []
+    def add_neighbour(self,node,time = 1):
+        self.neighbours.append((node,time))
